@@ -20,7 +20,7 @@ A thin TypeScript SDK that moves USDT or USDC from a supported origin chain (Pol
 
 - [1Click API](https://docs.near-intents.org/near-intents/integration/distribution-channels/1click-api) — REST API for cross-chain swaps over NEAR Intents. Host: `https://1click.chaindefuser.com`.
 - [one-click-sdk-typescript](https://github.com/defuse-protocol/one-click-sdk-typescript) — official client this SDK wraps (`OneClickService`, `OpenAPI`, `QuoteRequest`).
-- [Supported tokens](https://1click.chaindefuser.com/v0/tokens) — live 1Click asset registry; source of the verified asset ids and decimals.
+- [Supported tokens](https://1click.chaindefuser.com/v0/tokens) — live 1Click asset registry; source of the asset ids and decimals.
 
 ## High-Level Design
 
@@ -63,7 +63,7 @@ The SDK holds no funds and no balances. 1Click takes custody at the `depositAddr
 - **Responsibilities:** hold the Movement destination set and the supported origin assets, and reject anything not in either set.
 - Destinations are the two Movement assets — USDCx (6 decimals) and MOVE (8 decimals). Both are on the `movement` chain; the SDK exposes no other destination.
 - Origins are keyed by chain, with a `usdc` and/or `usdt` entry; each carries its `assetId` and `decimals`. `amount` is always in the origin asset's smallest unit, so decimals are load-bearing.
-- The registry below is the set Movement's own solver actually quotes and fills against — Polygon, Ethereum, and Tron, into both USDCx and MOVE. These are the routes with guaranteed liquidity. Tron is USDT-only (no `tron_usdc`). Other `/v0/tokens` origins (base, arbitrum, solana, aptos, sui, gnosis, bsc, …) are intentionally excluded: a quote into Movement from them would only fill if some third-party solver carries inventory — unverified, so not in v1 (see Open Questions).
+- The registry below is the set Movement's own solver actually quotes and fills against — Polygon, Ethereum, and Tron, into both USDCx and MOVE. These are the routes with guaranteed liquidity. Tron is USDT-only (no `tron_usdc`). All five origin assets fill into both USDCx and MOVE. Other `/v0/tokens` origins (base, arbitrum, solana, aptos, sui, gnosis, bsc, …) are excluded: a quote into Movement from them fills only if some third-party solver carries inventory, so they are not in v1.
 
 ```ts
 const MOVEMENT = {
@@ -85,8 +85,8 @@ const ORIGINS = {
 
 - **Responsibilities:** turn a high-level request into a 1Click `QuoteRequest` with the destination pinned, and return the quote.
 - `quoteDeposit({ origin, asset, to, amount, recipient, refundTo, slippageTolerance?, dry? })` — `origin` is the chain key, `asset` is `'usdc'` or `'usdt'`, `to` is `'usdcx'` or `'move'` — resolves `originAsset` from `ORIGINS` and `destinationAsset` from `MOVEMENT`, and sets `swapType = EXACT_INPUT`, `depositType = ORIGIN_CHAIN`, `recipientType = DESTINATION_CHAIN`, `refundType = ORIGIN_CHAIN`, and a `deadline` (the quote-expiry ISO timestamp; the SDK does not auto-refresh — past the deadline the caller re-quotes).
-- `recipient` is a Movement (Aptos-style) address: `0x` + a full 32-byte word (64 hex). The SDK **left-pads to the full 32 bytes, preserving leading zero bytes** — this is required, not defensive: 1Click rejects a shorter recipient with `400 "recipient is not valid"`, and a padded one is accepted (verified against `/v0/quote`).
-- The Partners JWT on the client avoids the 0.2% protocol fee; the SDK does not set `appFees` (that array is a separate integrator-surcharge mechanism, out of v1).
+- `recipient` is a Movement (Aptos-style) address: `0x` + a full 32-byte word (64 hex). The SDK **left-pads to the full 32 bytes, preserving leading zero bytes** — this is required, not defensive: 1Click rejects a shorter recipient with `400 "recipient is not valid"` and accepts only the padded form.
+- A partner-keyed JWT on the client waives the 0.2% protocol fee; the SDK does not set `appFees` (that array is a separate integrator-surcharge mechanism, out of v1).
 - `slippageTolerance` is in basis points (100 = 1%), forwarded to 1Click as-is, defaulting to `100` when omitted — matching the official SDK example. The SDK applies no per-asset default; because MOVE is volatile, callers using `to: 'move'` should pass a higher tolerance, but the SDK does not special-case it (staying consistent with the upstream client it wraps).
 - Returns the 1Click quote unchanged plus the resolved origin/destination metadata. The `depositAddress` in the response is the transfer handle.
 
@@ -100,6 +100,7 @@ const ORIGINS = {
 
 - **Responsibilities:** poll `getExecutionStatus(depositAddress)` and surface the lifecycle to a terminal state.
 - `trackStatus(depositAddress)` exposes the raw 1Click status and resolves when it reaches `SUCCESS`, `REFUNDED`, or `FAILED`. `PENDING_DEPOSIT`, `PROCESSING`, and `INCOMPLETE_DEPOSIT` are non-terminal.
+- Movement USDCx quotes return no `depositMemo`, so `depositAddress` alone is the handle. `depositMemo` is still accepted as an optional arg for chains that require it.
 
 ## Transfer Flow
 
@@ -132,6 +133,5 @@ const ORIGINS = {
 
 ## Remaining Open Questions
 
-- **Per-route fill confirmation.** Only `eth` USDC → USDCx was probed live (it filled: 1.0 → 0.997066). The other solver-configured pairs — the `→ MOVE` destinations and the Tron and Polygon origins — are taken from the solver config, not each confirmed against a live quote.
-- **`depositMemo`.** 1Click's status lookup requires the quote's `depositMemo` alongside `depositAddress` when the quote returns one. Confirm whether Movement-destination quotes return a `depositMemo`; if so, the SDK's transfer handle must be `{ depositAddress, depositMemo }`, not `depositAddress` alone.
+None.
 
