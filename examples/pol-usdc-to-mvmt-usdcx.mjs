@@ -1,17 +1,23 @@
 // Quote Polygon USDC -> USDCx on Movement, print MetaMask deposit instructions, then track.
-// Run (build first): npm run build
-//   RECIPIENT=0x<movement> REFUND_TO=0x<polygon> AMOUNT=100000 node --env-file=.env examples/quote-pol-usdcx.mjs
+// Run (build first with `npm run build`), token-free:
+//   RECIPIENT=0x<movement> REFUND_TO=0x<polygon> AMOUNT=20000 node examples/pol-usdc-to-mvmt-usdcx.mjs
 // Then in MetaMask send the printed amount of USDC (Polygon) to the printed address; needs POL for gas.
+// A 1Click JWT is optional (waives NEAR's fee): prepend ONE_CLICK_JWT=... to the command if you have one.
 import { configure, quoteDeposit, trackStatus } from "../dist/index.js";
 
-configure({ jwt: process.env.ONE_CLICK_JWT });
+configure({ jwt: process.env.ONE_CLICK_JWT }); // undefined when unset -> runs token-free
 
-const amount = process.env.AMOUNT ?? "1000000"; // default 1.0 USDC (6 decimals); 100000 = 0.10
+const amount = process.env.AMOUNT; // required: smallest units (6 decimals), e.g. 20000 = 0.02 USDC
+if (!amount) throw new Error("AMOUNT is required (smallest units, 6 decimals: 20000 = 0.02 USDC)");
+const recipient = process.env.RECIPIENT;
+if (!recipient) throw new Error("RECIPIENT is required (your Movement 0x address)");
+const refundTo = process.env.REFUND_TO;
+if (!refundTo) throw new Error("REFUND_TO is required (your Polygon 0x address)");
 const res = await quoteDeposit({
   origin: "pol", asset: "usdc", to: "usdcx",
   amount,
-  recipient: process.env.RECIPIENT,
-  refundTo: process.env.REFUND_TO,
+  recipient,
+  refundTo,
   deadline: new Date(Date.now() + 3600_000).toISOString(), // 1 hour to do the MetaMask send
   dry: false,
 });

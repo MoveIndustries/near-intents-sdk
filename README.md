@@ -2,18 +2,18 @@
 
 A thin TypeScript SDK for moving USDT or USDC from a supported origin chain onto Movement (as USDCx or MOVE) over NEAR Intents. It wraps the official [1Click API](https://docs.near-intents.org/near-intents/integration/distribution-channels/1click-api) client and pins the destination to Movement so callers can't accidentally land elsewhere. It orchestrates the transfer — quote, deposit address, status — and never holds keys.
 
-## Requirements
+## Authentication
 
-**Every consumer needs a 1Click JWT.** The SDK performs a full transfer (binding quote → deposit address → submit → status tracking), and all of those endpoints require a Partners Portal JWT — without one the API rejects them with 401. The only thing that works unauthenticated is a dry (non-binding) quote, which the SDK does not rely on. There is no JWT-free path to an actual transfer.
+**A 1Click JWT is optional — the full transfer works without one.** Binding quote → deposit address → status tracking all succeed unauthenticated. Verified on mainnet: a Polygon USDC → Movement USDCx transfer completed end-to-end with no token set.
 
-Obtain a JWT by registering at the [Partners Portal](https://partners.near-intents.org). Pass it to `configure()`; the SDK does not mint or refresh tokens.
+Pass a JWT only to waive NEAR's protocol fee — without one, NEAR auto-injects its `appFees` and takes a small cut of the swap — and for attributed rate limits instead of anonymous IP-based ones. Obtain one at the [Partners Portal](https://partners.near-intents.org) and pass it to `configure({ jwt })`; the SDK does not mint or refresh tokens.
 
 ## Usage
 
 ```ts
 import { configure, quoteDeposit, prepareDepositTx, trackStatus } from "near-intents-sdk";
 
-configure({ jwt: process.env.ONE_CLICK_JWT! });
+configure({ jwt: process.env.ONE_CLICK_JWT }); // jwt optional; omit configure() entirely to run token-free
 
 // 1. Quote: USDC on Ethereum -> USDCx on Movement. Destination is pinned to Movement.
 const res = await quoteDeposit({
