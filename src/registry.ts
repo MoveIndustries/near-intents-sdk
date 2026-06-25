@@ -10,15 +10,15 @@ export const MOVEMENT = {
 
 // tokenAddress is the L1 token contract the deposit transfer targets. Provenance (the omft assetId hex
 // equals the L1 contract only on EVM — never derive a non-EVM contract from it):
-//   eth  USDC 0xa0b8…eb48 / USDT 0xdac1…1ec7  — canonical Ethereum contracts (also embedded in the assetId).
-//   pol  USDC 0x3c49…3359 (native USDC, NOT USDC.e) / USDT 0xc213…8e8f — canonical Polygon contracts.
-//   tron USDT 41a614f803… (TR7NHqje…)          — canonical TRC-20 USDT; NOT the omft assetId hex (a bridge id).
+//   ethereum USDC 0xa0b8…eb48 / USDT 0xdac1…1ec7  — canonical Ethereum contracts (also embedded in the assetId).
+//   polygon  USDC 0x3c49…3359 (native USDC, NOT USDC.e) / USDT 0xc213…8e8f — canonical Polygon contracts.
+//   tron     USDT 41a614f803… (TR7NHqje…)          — canonical TRC-20 USDT; NOT the omft assetId hex (a bridge id).
 export const ORIGINS = {
-  eth: {
+  ethereum: {
     usdc: { assetId: "nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near", decimals: 6, tokenAddress: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" },
     usdt: { assetId: "nep141:eth-0xdac17f958d2ee523a2206206994597c13d831ec7.omft.near", decimals: 6, tokenAddress: "0xdac17f958d2ee523a2206206994597c13d831ec7" },
   },
-  pol: {
+  polygon: {
     usdc: { assetId: "nep245:v2_1.omni.hot.tg:137_qiStmoQJDQPTebaPjgx5VBxZv6L", decimals: 6, tokenAddress: "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359" },
     usdt: { assetId: "nep245:v2_1.omni.hot.tg:137_3hpYoaLtt8MP1Z2GH1U473DMRKgr", decimals: 6, tokenAddress: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f" },
   },

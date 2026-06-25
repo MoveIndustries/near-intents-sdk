@@ -5,7 +5,7 @@ const q = (depositAddress: string | undefined, amountIn: string) => ({ quote: { 
 
 describe("prepareDepositTx", () => {
   it("encodes an ERC-20 transfer for EVM origins", () => {
-    const tx = prepareDepositTx("eth", "usdc", q("0x000000000000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9", "1000000"));
+    const tx = prepareDepositTx("ethereum", "usdc", q("0x000000000000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9", "1000000"));
     expect(tx).toEqual({
       family: "evm",
       to: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
@@ -26,12 +26,12 @@ describe("prepareDepositTx", () => {
   });
 
   it("encodes polygon against native USDC", () => {
-    const tx = prepareDepositTx("pol", "usdc", q("0x000000000000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9", "1000000")) as { family: string; to: string };
+    const tx = prepareDepositTx("polygon", "usdc", q("0x000000000000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9", "1000000")) as { family: string; to: string };
     expect(tx.family).toBe("evm");
     expect(tx.to).toBe("0x3c499c542cef5e3811e1192ce70d8cc03d5c3359");
   });
 
   it("throws on dry quotes (no depositAddress)", () => {
-    expect(() => prepareDepositTx("eth", "usdc", q(undefined, "1"))).toThrow(/depositAddress/);
+    expect(() => prepareDepositTx("ethereum", "usdc", q(undefined, "1"))).toThrow(/depositAddress/);
   });
 });

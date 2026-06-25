@@ -3,7 +3,7 @@ import { OneClickService, QuoteRequest } from "@defuse-protocol/one-click-sdk-ty
 import { quoteDeposit } from "../src/quote.js";
 import { MOVEMENT, ORIGINS } from "../src/registry.js";
 
-const base = { origin: "eth", asset: "usdc", to: "usdcx", amount: "1000000", recipient: "0x0a1b", refundTo: "0x1111111111111111111111111111111111111111" } as const;
+const base = { origin: "ethereum", asset: "usdc", to: "usdcx", amount: "1000000", recipient: "0x0a1b", refundTo: "0x1111111111111111111111111111111111111111" } as const;
 
 describe("quoteDeposit", () => {
   beforeEach(() => vi.restoreAllMocks());
@@ -13,7 +13,7 @@ describe("quoteDeposit", () => {
     await quoteDeposit({ ...base });
     const req = spy.mock.calls[0][0];
     expect(req.destinationAsset).toBe(MOVEMENT.usdcx.assetId);
-    expect(req.originAsset).toBe(ORIGINS.eth.usdc.assetId);
+    expect(req.originAsset).toBe(ORIGINS.ethereum.usdc.assetId);
     expect(req.recipient).toMatch(/^0x[0-9a-f]{64}$/);
     expect(req.swapType).toBe(QuoteRequest.swapType.EXACT_INPUT);
     expect(req.depositType).toBe(QuoteRequest.depositType.ORIGIN_CHAIN);

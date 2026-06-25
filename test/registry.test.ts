@@ -3,7 +3,7 @@ import { resolveOrigin, resolveDest, normalizeRecipient, MOVEMENT } from "../src
 
 describe("registry", () => {
   it("resolves known origin/asset pairs", () => {
-    expect(resolveOrigin("eth", "usdc").assetId).toContain("eth-0xa0b8");
+    expect(resolveOrigin("ethereum", "usdc").assetId).toContain("eth-0xa0b8");
     expect(resolveOrigin("tron", "usdt").tokenAddress).toBe("41a614f803b6fd780986a42c78ec9c7f77e6ded13c");
   });
 

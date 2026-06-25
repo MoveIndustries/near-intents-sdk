@@ -12,7 +12,7 @@ const REFUND = "0x1111111111111111111111111111111111111111";
 describe.skipIf(!process.env.LIVE)("live dry quote (no JWT)", () => {
   it("eth-USDC -> Movement USDCx returns a fillable quote", { retry: 2, timeout: 30_000 }, async () => {
     const res = await quoteDeposit({
-      origin: "eth", asset: "usdc", to: "usdcx", amount: "1000000",
+      origin: "ethereum", asset: "usdc", to: "usdcx", amount: "1000000",
       recipient: RECIPIENT, refundTo: REFUND, dry: true,
     });
     expect(BigInt(res.quote.amountOut)).toBeGreaterThan(0n);
@@ -25,7 +25,7 @@ describe.skipIf(!process.env.AUTH)("live authenticated quote (JWT)", () => {
     if (!jwt) throw new Error("ONE_CLICK_JWT is required for test:auth — set it in .env");
     configure({ jwt });
     const res = await quoteDeposit({
-      origin: "eth", asset: "usdc", to: "usdcx", amount: "1000000",
+      origin: "ethereum", asset: "usdc", to: "usdcx", amount: "1000000",
       recipient: RECIPIENT, refundTo: REFUND, dry: false,
     });
     expect(res.quote.depositAddress).toMatch(/^0x[0-9a-fA-F]+$/);
