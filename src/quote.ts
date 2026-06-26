@@ -13,8 +13,11 @@ export type QuoteDepositParams = {
   dry?: boolean;
 };
 
-export function configure(opts: { jwt?: string | (() => Promise<string>) }): void {
+// baseUrl points the SDK at a server-side proxy that injects the JWT, so the token
+// never ships to the browser; omit it to call 1Click directly.
+export function configure(opts: { jwt?: string | (() => Promise<string>); baseUrl?: string }): void {
   OpenAPI.TOKEN = opts.jwt;
+  if (opts.baseUrl) OpenAPI.BASE = opts.baseUrl;
 }
 
 export async function quoteDeposit(p: QuoteDepositParams): Promise<QuoteResponse> {

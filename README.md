@@ -8,6 +8,8 @@ A thin TypeScript SDK for moving USDT or USDC from a supported origin chain onto
 
 Pass a JWT only to waive NEAR's protocol fee — without one, NEAR auto-injects its `appFees` and takes a small cut of the swap — and for attributed rate limits instead of anonymous IP-based ones. Obtain one at the [Partners Portal](https://partners.near-intents.org) and pass it to `configure({ jwt })`; the SDK does not mint or refresh tokens.
 
+A JWT is a secret, so in a browser don't ship it to the client. Front 1Click with a server-side proxy that injects the token and point the SDK at it with `configure({ baseUrl: "/api/oneclick" })` (omit `jwt` — the proxy holds it). Without `baseUrl` the SDK calls 1Click directly.
+
 ## Usage
 
 ```ts
