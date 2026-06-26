@@ -19,7 +19,7 @@ configure({ jwt: process.env.ONE_CLICK_JWT }); // jwt optional; omit configure()
 
 // 1. Quote: USDC on Ethereum -> USDCx on Movement. Destination is pinned to Movement.
 const res = await quoteDeposit({
-  origin: "eth",            // "eth" | "pol" | "tron"
+  origin: "ethereum",       // "ethereum" | "polygon" | "tron"
   asset: "usdc",            // "usdc" | "usdt"  (tron is usdt-only)
   to: "usdcx",              // "usdcx" | "move"
   amount: "1000000",        // 1.0 USDC, in the origin asset's smallest units
@@ -30,7 +30,7 @@ const res = await quoteDeposit({
 const { depositAddress, amountOut, deadline } = res.quote;
 
 // 2. (Optional) Build the unsigned deposit transfer; your wallet signs + broadcasts it.
-const depositTx = prepareDepositTx("eth", "usdc", res);
+const depositTx = prepareDepositTx("ethereum", "usdc", res);
 // EVM: { family: "evm", to, value, data }   Tron: { family: "tron", contractAddress, function, parameter }
 
 // 3. (Optional) After broadcasting, hand 1Click the tx hash to speed up deposit detection.
