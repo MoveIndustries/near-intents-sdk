@@ -8,14 +8,10 @@ const TERMINAL = new Set<GetExecutionStatusResponse.status>([
 
 export const isTerminal = (status: GetExecutionStatusResponse.status): boolean => TERMINAL.has(status);
 
-/** Poll until the swap reaches a terminal state (SUCCESS | REFUNDED | FAILED). */
-export async function trackStatus(
+/** Fetch the swap's current execution status once. Poll it yourself, checking `isTerminal`. */
+export async function getStatus(
   depositAddress: string,
-  opts: { intervalMs?: number; depositMemo?: string } = {},
+  opts: { depositMemo?: string } = {},
 ): Promise<GetExecutionStatusResponse> {
-  for (;;) {
-    const res = await OneClickService.getExecutionStatus(depositAddress, opts.depositMemo);
-    if (isTerminal(res.status)) return res;
-    await new Promise((r) => setTimeout(r, opts.intervalMs ?? 3000));
-  }
+  return OneClickService.getExecutionStatus(depositAddress, opts.depositMemo);
 }

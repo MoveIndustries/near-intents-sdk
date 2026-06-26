@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { OneClickService, GetExecutionStatusResponse } from "@defuse-protocol/one-click-sdk-typescript";
-import { trackStatus, isTerminal } from "../src/status.js";
+import { getStatus, isTerminal } from "../src/status.js";
 
 const S = GetExecutionStatusResponse.status;
 
@@ -12,13 +12,11 @@ describe("status", () => {
     expect([S.PENDING_DEPOSIT, S.PROCESSING, S.INCOMPLETE_DEPOSIT].some(isTerminal)).toBe(false);
   });
 
-  it("polls until a terminal state", async () => {
-    const spy = vi.spyOn(OneClickService, "getExecutionStatus")
-      .mockResolvedValueOnce({ status: S.PENDING_DEPOSIT } as any)
-      .mockResolvedValueOnce({ status: S.PROCESSING } as any)
-      .mockResolvedValueOnce({ status: S.SUCCESS } as any);
-    const res = await trackStatus("0xdep", { intervalMs: 0 });
-    expect(res.status).toBe(S.SUCCESS);
-    expect(spy).toHaveBeenCalledTimes(3);
+  it("fetches the current status once", async () => {
+    const spy = vi.spyOn(OneClickService, "getExecutionStatus").mockResolvedValue({ status: S.PROCESSING } as any);
+    const res = await getStatus("0xdep", { depositMemo: "m1" });
+    expect(res.status).toBe(S.PROCESSING);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledWith("0xdep", "m1");
   });
 });

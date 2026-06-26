@@ -13,7 +13,7 @@ A JWT is a secret, so in a browser don't ship it to the client. Front 1Click wit
 ## Usage
 
 ```ts
-import { configure, quoteDeposit, prepareDepositTx, trackStatus } from "near-intents-sdk";
+import { configure, quoteDeposit, prepareDepositTx, submitDeposit, getStatus, isTerminal } from "near-intents-sdk";
 
 configure({ jwt: process.env.ONE_CLICK_JWT }); // jwt optional; omit configure() entirely to run token-free
 
@@ -33,9 +33,12 @@ const { depositAddress, amountOut, deadline } = res.quote;
 const depositTx = prepareDepositTx("eth", "usdc", res);
 // EVM: { family: "evm", to, value, data }   Tron: { family: "tron", contractAddress, function, parameter }
 
-// 3. Track to a terminal state.
-const result = await trackStatus(depositAddress!);
-// result.status === "SUCCESS" | "REFUNDED" | "FAILED"
+// 3. (Optional) After broadcasting, hand 1Click the tx hash to speed up deposit detection.
+await submitDeposit(depositAddress!, "0xYourDepositTxHash");
+
+// 4. Read execution status. Poll on your own cadence until isTerminal(status).
+const { status } = await getStatus(depositAddress!);
+// isTerminal(status) is true for "SUCCESS" | "REFUNDED" | "FAILED"
 ```
 
 The SDK never signs, broadcasts, or holds keys — step 2 returns an *unsigned* transaction for your wallet.
