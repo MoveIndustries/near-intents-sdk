@@ -3,7 +3,7 @@ import { OneClickService, OpenAPI, QuoteRequest } from "@defuse-protocol/one-cli
 import { configure, quoteDeposit } from "../src/quote.js";
 import { MOVEMENT, ORIGINS } from "../src/registry.js";
 
-const base = { origin: "ethereum", asset: "usdc", to: "usdcx", amount: "1000000", recipient: "0x0a1b", refundTo: "0x1111111111111111111111111111111111111111" } as const;
+const base = { originChain: "ethereum", originAsset: "usdc", destinationAsset: "usdcx", amount: "1000000", recipient: "0x0a1b", refundTo: "0x1111111111111111111111111111111111111111" } as const;
 
 describe("quoteDeposit", () => {
   beforeEach(() => vi.restoreAllMocks());
@@ -26,7 +26,7 @@ describe("quoteDeposit", () => {
   it("fails closed before any network call", async () => {
     const spy = vi.spyOn(OneClickService, "getQuote").mockResolvedValue({} as any);
     await expect(quoteDeposit({ ...base, amount: "0" })).rejects.toThrow(/amount/);
-    await expect(quoteDeposit({ ...base, origin: "base" as any })).rejects.toThrow(/unsupported/);
+    await expect(quoteDeposit({ ...base, originChain: "base" as any })).rejects.toThrow(/unsupported/);
     await expect(quoteDeposit({ ...base, deadline: "2000-01-01T00:00:00.000Z" })).rejects.toThrow(/past/);
     expect(spy).not.toHaveBeenCalled();
   });

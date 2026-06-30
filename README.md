@@ -19,9 +19,9 @@ configure({ jwt: process.env.ONE_CLICK_JWT }); // jwt optional; omit configure()
 
 // 1. Quote: USDC on Ethereum -> USDCx on Movement. Destination is pinned to Movement.
 const res = await quoteDeposit({
-  origin: "ethereum",       // "ethereum" | "polygon" | "tron"
-  asset: "usdc",            // "usdc" | "usdt"  (tron is usdt-only)
-  to: "usdcx",              // "usdcx" | "move"
+  originChain: "ethereum",  // "ethereum" | "polygon" | "tron"
+  originAsset: "usdc",      // "usdc" | "usdt"  (tron is usdt-only)
+  destinationAsset: "usdcx", // "usdcx" | "move"
   amount: "1000000",        // 1.0 USDC, in the origin asset's smallest units
   recipient: "0xYourMovementAddress",
   refundTo: "0xYourEthereumAddress",

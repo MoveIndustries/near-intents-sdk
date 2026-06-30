@@ -2,9 +2,9 @@ import { OneClickService, OpenAPI, QuoteRequest, type QuoteResponse } from "@def
 import { resolveOrigin, resolveDest, normalizeRecipient, type OriginKey, type StableKey, type DestKey } from "./registry.js";
 
 export type QuoteDepositParams = {
-  origin: OriginKey;
-  asset: StableKey;
-  to: DestKey;
+  originChain: OriginKey;
+  originAsset: StableKey;
+  destinationAsset: DestKey;
   amount: string; // smallest unit of the origin asset
   recipient: string; // Movement address
   refundTo: string; // origin-chain address
@@ -21,8 +21,8 @@ export function configure(opts: { jwt?: string | (() => Promise<string>); baseUr
 }
 
 export async function quoteDeposit(p: QuoteDepositParams): Promise<QuoteResponse> {
-  const origin = resolveOrigin(p.origin, p.asset);
-  const dest = resolveDest(p.to);
+  const origin = resolveOrigin(p.originChain, p.originAsset);
+  const dest = resolveDest(p.destinationAsset);
   if (!/^[0-9]+$/.test(p.amount) || BigInt(p.amount) <= 0n) throw new Error(`amount must be a positive integer string: ${p.amount}`);
   const deadline = p.deadline ?? new Date(Date.now() + 600_000).toISOString();
   if (Date.parse(deadline) <= Date.now()) throw new Error(`deadline is in the past: ${deadline}`);

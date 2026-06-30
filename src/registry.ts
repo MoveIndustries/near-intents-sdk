@@ -29,15 +29,15 @@ export const ORIGINS = {
 
 export const family = (origin: OriginKey): "evm" | "tron" => (origin === "tron" ? "tron" : "evm");
 
-export function resolveOrigin(origin: string, asset: string): AssetEntry {
-  const e = (ORIGINS as Record<string, Record<string, AssetEntry>>)[origin]?.[asset];
-  if (!e) throw new Error(`unsupported origin/asset: ${origin}/${asset}`);
+export function resolveOrigin(origin: string, originAsset: string): AssetEntry {
+  const e = (ORIGINS as Record<string, Record<string, AssetEntry>>)[origin]?.[originAsset];
+  if (!e) throw new Error(`unsupported origin/originAsset: ${origin}/${originAsset}`);
   return e;
 }
 
-export function resolveDest(to: string): AssetEntry {
-  const e = (MOVEMENT as Record<string, AssetEntry>)[to];
-  if (!e) throw new Error(`unsupported destination: ${to}`);
+export function resolveDest(destinationAsset: string): AssetEntry {
+  const e = (MOVEMENT as Record<string, AssetEntry>)[destinationAsset];
+  if (!e) throw new Error(`unsupported destination: ${destinationAsset}`);
   return e;
 }
 

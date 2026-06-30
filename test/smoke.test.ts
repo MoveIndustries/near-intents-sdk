@@ -10,9 +10,9 @@ const TRON_REFUND = "410000000000000000000000000000000000000000";
 // Each origin's deposit address also comes back in that chain's native encoding:
 //   evm  -> 0x-prefixed hex; tron -> base58check (T...) or hex (41...).
 const CASES = [
-  { origin: "ethereum", asset: "usdc", refundTo: EVM_REFUND, depositAddress: /^0x[0-9a-fA-F]+$/ },
-  { origin: "polygon", asset: "usdc", refundTo: EVM_REFUND, depositAddress: /^0x[0-9a-fA-F]+$/ },
-  { origin: "tron", asset: "usdt", refundTo: TRON_REFUND, depositAddress: /^(T[1-9A-HJ-NP-Za-km-z]+|41[0-9a-fA-F]+)$/ },
+  { originChain: "ethereum", originAsset: "usdc", refundTo: EVM_REFUND, depositAddress: /^0x[0-9a-fA-F]+$/ },
+  { originChain: "polygon", originAsset: "usdc", refundTo: EVM_REFUND, depositAddress: /^0x[0-9a-fA-F]+$/ },
+  { originChain: "tron", originAsset: "usdt", refundTo: TRON_REFUND, depositAddress: /^(T[1-9A-HJ-NP-Za-km-z]+|41[0-9a-fA-F]+)$/ },
 ] as const;
 
 // Integration tests, controlled by explicit levers (not by JWT presence):
@@ -22,9 +22,9 @@ const CASES = [
 
 describe.skipIf(!process.env.LIVE)("live dry quote (no JWT)", () => {
   for (const c of CASES) {
-    it(`${c.origin}-${c.asset} -> Movement USDCx returns a fillable quote`, { retry: 2, timeout: 30_000 }, async () => {
+    it(`${c.originChain}-${c.originAsset} -> Movement USDCx returns a fillable quote`, { retry: 2, timeout: 30_000 }, async () => {
       const res = await quoteDeposit({
-        origin: c.origin, asset: c.asset, to: "usdcx", amount: "1000000",
+        originChain: c.originChain, originAsset: c.originAsset, destinationAsset: "usdcx", amount: "1000000",
         recipient: RECIPIENT, refundTo: c.refundTo, dry: true,
       });
       expect(BigInt(res.quote.amountOut)).toBeGreaterThan(0n);
@@ -34,12 +34,12 @@ describe.skipIf(!process.env.LIVE)("live dry quote (no JWT)", () => {
 
 describe.skipIf(!process.env.AUTH)("live authenticated quote (JWT)", () => {
   for (const c of CASES) {
-    it(`${c.origin}-${c.asset} -> Movement USDCx returns a real deposit address`, { retry: 2, timeout: 30_000 }, async () => {
+    it(`${c.originChain}-${c.originAsset} -> Movement USDCx returns a real deposit address`, { retry: 2, timeout: 30_000 }, async () => {
       const jwt = process.env.ONE_CLICK_JWT;
       if (!jwt) throw new Error("ONE_CLICK_JWT is required for test:auth — set it in .env");
       configure({ jwt });
       const res = await quoteDeposit({
-        origin: c.origin, asset: c.asset, to: "usdcx", amount: "1000000",
+        originChain: c.originChain, originAsset: c.originAsset, destinationAsset: "usdcx", amount: "1000000",
         recipient: RECIPIENT, refundTo: c.refundTo, dry: false,
       });
       expect(res.quote.depositAddress).toMatch(c.depositAddress);

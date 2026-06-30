@@ -14,7 +14,7 @@ if (!recipient) throw new Error("RECIPIENT is required (your Movement 0x address
 const refundTo = process.env.REFUND_TO;
 if (!refundTo) throw new Error("REFUND_TO is required (your Polygon 0x address)");
 const res = await quoteDeposit({
-  origin: "pol", asset: "usdc", to: "usdcx",
+  originChain: "pol", originAsset: "usdc", destinationAsset: "usdcx",
   amount,
   recipient,
   refundTo,
