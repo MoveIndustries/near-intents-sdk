@@ -7,6 +7,8 @@ export type SupportedToken = {
   decimals: number;
   chain: string; // 1Click chain id ('eth' | 'pol' | 'tron' | 'movement')
   contractAddress?: string;
+  price: number;
+  priceUpdatedAt: string;
   originChain?: OriginKey;
   originAsset?: StableKey; // originChain + originAsset are set for source tokens
   destinationAsset?: DestKey; // set for Movement destination tokens
@@ -43,6 +45,8 @@ export async function listTokens(): Promise<SupportedToken[]> {
       decimals: t.decimals,
       chain: t.blockchain,
       contractAddress: t.contractAddress,
+      price: t.price,
+      priceUpdatedAt: t.priceUpdatedAt,
       ...tag,
     });
   }

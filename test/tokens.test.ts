@@ -29,6 +29,7 @@ describe("listTokens", () => {
     const src = out.find((t) => t.assetId === ORIGINS.ethereum.usdc.assetId)!;
     expect(src).toMatchObject({ originChain: "ethereum", originAsset: "usdc", chain: "eth" });
     expect(src.destinationAsset).toBeUndefined();
+    expect(src).toMatchObject({ price: 1, priceUpdatedAt: "2026-01-01T00:00:00Z" });
 
     const dst = out.find((t) => t.assetId === MOVEMENT.usdcx.assetId)!;
     expect(dst).toMatchObject({ destinationAsset: "usdcx", chain: "movement" });
