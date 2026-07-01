@@ -25,7 +25,7 @@ const res = await quoteDeposit({
   amount: "1000000",        // 1.0 USDC, in the origin asset's smallest units
   recipient: "0xYourMovementAddress",
   refundTo: "0xYourEthereumAddress",
-  // slippageTolerance: 100, // basis points, defaults to 100 (1%); raise it for `to: "move"`
+  // slippageTolerance: 100, // basis points, defaults to 100 (1%); raise it for `destinationAsset: "move"`
 });
 const { depositAddress, amountOut, deadline } = res.quote;
 
@@ -49,7 +49,7 @@ Backed by Movement's own solver: origins **Polygon, Ethereum, Tron** (USDC + USD
 
 ## Status
 
-Not yet published to npm. Install from source: `npm i && npm run build`.
+Not yet published to npm. Install from source: `npm i && npm run build`. See [CHANGELOG.md](CHANGELOG.md) for changes.
 
 Tests:
 - `npm test` — unit only, offline, no secrets.
