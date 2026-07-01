@@ -2,6 +2,10 @@ import { describe, it, expect } from "vitest";
 import { configure, quoteDeposit } from "../src/index.js";
 
 const RECIPIENT = "0x000000000000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9";
+// 10 units (all origins are 6-decimal here). Well above the per-origin bridge minimum,
+// which is dynamic — Tron's floor tracks its gas/fees and has sat above 1 unit, so a fixed
+// 1-unit amount raced that moving floor. Dry quotes move no funds, so a larger amount is free.
+const AMOUNT = "10000000";
 const EVM_REFUND = "0x1111111111111111111111111111111111111111";
 // Tron's raw hex (41 + 20 bytes) form, so it needs no base58 checksum like a T... address would.
 const TRON_REFUND = "410000000000000000000000000000000000000000";
@@ -24,7 +28,7 @@ describe.skipIf(!process.env.LIVE)("live dry quote (no JWT)", () => {
   for (const c of CASES) {
     it(`${c.originChain}-${c.originAsset} -> Movement USDCx returns a fillable quote`, { retry: 2, timeout: 30_000 }, async () => {
       const res = await quoteDeposit({
-        originChain: c.originChain, originAsset: c.originAsset, destinationAsset: "usdcx", amount: "1000000",
+        originChain: c.originChain, originAsset: c.originAsset, destinationAsset: "usdcx", amount: AMOUNT,
         recipient: RECIPIENT, refundTo: c.refundTo, dry: true,
       });
       expect(BigInt(res.quote.amountOut)).toBeGreaterThan(0n);
@@ -39,7 +43,7 @@ describe.skipIf(!process.env.AUTH)("live authenticated quote (JWT)", () => {
       if (!jwt) throw new Error("ONE_CLICK_JWT is required for test:auth — set it in .env");
       configure({ jwt });
       const res = await quoteDeposit({
-        originChain: c.originChain, originAsset: c.originAsset, destinationAsset: "usdcx", amount: "1000000",
+        originChain: c.originChain, originAsset: c.originAsset, destinationAsset: "usdcx", amount: AMOUNT,
         recipient: RECIPIENT, refundTo: c.refundTo, dry: false,
       });
       expect(res.quote.depositAddress).toMatch(c.depositAddress);
