@@ -13,7 +13,7 @@ A JWT is a secret, so in a browser don't ship it to the client. Front 1Click wit
 ## Usage
 
 ```ts
-import { configure, quoteDeposit, prepareDepositTx, submitDeposit, getStatus, isTerminal } from "near-intents-sdk";
+import { configure, quoteDeposit, prepareDepositTx, submitDeposit, getStatus, isTerminal } from "@moveindustries/near-intents-sdk";
 
 configure({ jwt: process.env.ONE_CLICK_JWT }); // jwt optional; omit configure() entirely to run token-free
 
@@ -47,11 +47,16 @@ The SDK never signs, broadcasts, or holds keys — step 2 returns an *unsigned* 
 
 Backed by Movement's own solver: origins **Polygon, Ethereum, Tron** (USDC + USDT; Tron is USDT-only) → **USDCx** or **MOVE** on Movement.
 
-## Status
+## Install
 
-Not yet published to npm. Install from source: `npm i && npm run build`. See [CHANGELOG.md](CHANGELOG.md) for changes.
+```sh
+npm i @moveindustries/near-intents-sdk
+```
 
-Tests:
+Published manually by a maintainer: bump the version, update [CHANGELOG.md](CHANGELOG.md), then `npm publish` (which builds via `prepublishOnly`). See [CHANGELOG.md](CHANGELOG.md) for changes.
+
+## Tests
+
 - `npm test` — unit only, offline, no secrets.
 - `npm run test:live:noauth` — adds a live dry quote against the real API (no JWT).
 - `npm run test:live:auth` — adds an authenticated quote; requires `ONE_CLICK_JWT` in `.env` (fails if unset).
