@@ -1,5 +1,5 @@
 {
-  "name": "near-intents-sdk",
+  "name": "@moveindustries/near-intents-sdk",
   "version": "0.0.1",
   "description": "Thin SDK: USDT/USDC -> Movement USDCx/MOVE over NEAR Intents 1Click.",
   "type": "module",
@@ -8,8 +8,28 @@
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MoveIndustries/near-intents-sdk.git"
+  },
+  "homepage": "https://github.com/MoveIndustries/near-intents-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/MoveIndustries/near-intents-sdk/issues"
+  },
+  "keywords": [
+    "movement",
+    "near-intents",
+    "1click",
+    "usdc",
+    "usdt",
+    "bridge"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:live:noauth": "LIVE=1 node --env-file-if-exists=.env ./node_modules/.bin/vitest run",
