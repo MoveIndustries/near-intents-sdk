@@ -29,7 +29,7 @@ describe.skipIf(!process.env.LIVE)("live dry quote (no JWT)", () => {
     it(`${c.originChain}-${c.originAsset} -> Movement USDCx returns a fillable quote`, { retry: 2, timeout: 30_000 }, async () => {
       const res = await quoteDeposit({
         originChain: c.originChain, originAsset: c.originAsset, destinationAsset: "usdcx", amount: AMOUNT,
-        recipient: RECIPIENT, refundTo: c.refundTo, dry: true,
+        recipient: RECIPIENT, refundTo: c.refundTo, minAmountOut: "0", dry: true,
       });
       expect(BigInt(res.quote.amountOut)).toBeGreaterThan(0n);
     });
@@ -44,7 +44,7 @@ describe.skipIf(!process.env.AUTH)("live authenticated quote (JWT)", () => {
       configure({ jwt });
       const res = await quoteDeposit({
         originChain: c.originChain, originAsset: c.originAsset, destinationAsset: "usdcx", amount: AMOUNT,
-        recipient: RECIPIENT, refundTo: c.refundTo, dry: false,
+        recipient: RECIPIENT, refundTo: c.refundTo, minAmountOut: "0", dry: false,
       });
       expect(res.quote.depositAddress).toMatch(c.depositAddress);
     });

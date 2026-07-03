@@ -9,6 +9,7 @@ export type QuoteDepositParams = {
   recipient: string; // Movement address
   refundTo: string; // origin-chain address
   slippageTolerance?: number; // basis points, defaults to 100 (1%)
+  minAmountOut: string; // smallest unit of the destination asset; reject the quote if its guaranteed output falls below this floor. Pass "0" to explicitly opt out.
   deadline?: string; // ISO; defaults to now + 10 min
   dry?: boolean;
 };
@@ -26,7 +27,10 @@ export async function quoteDeposit(p: QuoteDepositParams): Promise<QuoteResponse
   if (!/^[0-9]+$/.test(p.amount) || BigInt(p.amount) <= 0n) throw new Error(`amount must be a positive integer string: ${p.amount}`);
   const deadline = p.deadline ?? new Date(Date.now() + 600_000).toISOString();
   if (Date.parse(deadline) <= Date.now()) throw new Error(`deadline is in the past: ${deadline}`);
-  return OneClickService.getQuote({
+  if (!/^[0-9]+$/.test(p.minAmountOut)) {
+    throw new Error(`minAmountOut must be a non-negative integer string ("0" opts out of the floor): ${p.minAmountOut}`);
+  }
+  const res = await OneClickService.getQuote({
     dry: p.dry ?? false,
     swapType: QuoteRequest.swapType.EXACT_INPUT,
     slippageTolerance: p.slippageTolerance ?? 100,
@@ -40,4 +44,12 @@ export async function quoteDeposit(p: QuoteDepositParams): Promise<QuoteResponse
     refundType: QuoteRequest.refundType.ORIGIN_CHAIN,
     deadline,
   });
+  // Guard against a poorly-priced quote: compare the caller's floor against the quote's
+  // guaranteed output (minAmountOut after slippage), not the expected amountOut, so the check
+  // holds even in the worst-case execution the quote permits. A floor of 0 opts out.
+  const floor = BigInt(p.minAmountOut);
+  if (floor > 0n && BigInt(res.quote.minAmountOut) < floor) {
+    throw new Error(`quote below floor: guaranteed minAmountOut ${res.quote.minAmountOut} < minAmountOut ${p.minAmountOut}`);
+  }
+  return res;
 }
