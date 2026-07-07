@@ -1,6 +1,6 @@
 {
   "name": "@moveindustries/near-intents-sdk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Thin SDK: USDT/USDC -> Movement USDCx/MOVE over NEAR Intents 1Click.",
   "type": "module",
   "main": "dist/index.js",
