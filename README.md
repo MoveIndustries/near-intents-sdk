@@ -25,6 +25,7 @@ const res = await quoteDeposit({
   amount: "1000000",        // 1.0 USDC, in the origin asset's smallest units
   recipient: "0xYourMovementAddress",
   refundTo: "0xYourEthereumAddress",
+  minAmountOut: "995000",   // required floor in the destination asset's smallest units; throws if the quote's guaranteed output is lower. Pass "0" to opt out.
   // slippageTolerance: 100, // basis points, defaults to 100 (1%); raise it for `destinationAsset: "move"`
 });
 const { depositAddress, amountOut, deadline } = res.quote;
