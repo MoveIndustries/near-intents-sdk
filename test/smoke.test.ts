@@ -50,3 +50,19 @@ describe.skipIf(!process.env.AUTH)("live authenticated quote (JWT)", () => {
     });
   }
 });
+
+// Confidential Intents (NEAR private-shard execution) is GA but requires a JWT — a public
+// (no-JWT) request 401s with "authentication is required for confidential intent quotes".
+// So it can only be exercised in the authenticated tier.
+describe.skipIf(!process.env.AUTH)("live confidential quote (JWT)", () => {
+  it("ethereum-usdc -> Movement USDCx returns a fillable confidential quote, still pinned to Movement", { retry: 2, timeout: 30_000 }, async () => {
+    const jwt = process.env.ONE_CLICK_JWT;
+    if (!jwt) throw new Error("ONE_CLICK_JWT is required for test:auth — set it in .env");
+    configure({ jwt });
+    const res = await quoteDeposit({
+      originChain: "ethereum", originAsset: "usdc", destinationAsset: "usdcx", amount: AMOUNT,
+      recipient: RECIPIENT, refundTo: EVM_REFUND, minAmountOut: "0", dry: true, confidentiality: "basic",
+    });
+    expect(BigInt(res.quote.amountOut)).toBeGreaterThan(0n);
+  });
+});

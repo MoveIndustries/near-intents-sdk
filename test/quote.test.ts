@@ -6,7 +6,7 @@ import { MOVEMENT, ORIGINS } from "../src/registry.js";
 const base = { originChain: "ethereum", originAsset: "usdc", destinationAsset: "usdcx", amount: "1000000", recipient: "0x0a1b", refundTo: "0x1111111111111111111111111111111111111111", minAmountOut: "0" } as const;
 
 describe("quoteDeposit", () => {
-  beforeEach(() => vi.restoreAllMocks());
+  beforeEach(() => { vi.restoreAllMocks(); OpenAPI.TOKEN = undefined; });
 
   it("builds a pinned QuoteRequest and forwards it", async () => {
     const spy = vi.spyOn(OneClickService, "getQuote").mockResolvedValue({} as any);
@@ -47,6 +47,29 @@ describe("quoteDeposit", () => {
     const res = { quote: { minAmountOut: "1" } };
     vi.spyOn(OneClickService, "getQuote").mockResolvedValue(res as any);
     await expect(quoteDeposit({ ...base, minAmountOut: "0" })).resolves.toBe(res);
+  });
+
+  it("forwards confidentiality when set, leaving the Movement pin untouched", async () => {
+    OpenAPI.TOKEN = "tok"; // confidential quotes require auth
+    const spy = vi.spyOn(OneClickService, "getQuote").mockResolvedValue({} as any);
+    await quoteDeposit({ ...base, confidentiality: "advanced" });
+    const req = spy.mock.calls[0][0];
+    expect(req.confidentiality).toBe(QuoteRequest.confidentiality.ADVANCED);
+    // confidentiality layers underneath — recipient routing is unchanged
+    expect(req.recipientType).toBe(QuoteRequest.recipientType.DESTINATION_CHAIN);
+    expect(req.destinationAsset).toBe(MOVEMENT.usdcx.assetId);
+  });
+
+  it("omits confidentiality by default (public quote)", async () => {
+    const spy = vi.spyOn(OneClickService, "getQuote").mockResolvedValue({} as any);
+    await quoteDeposit({ ...base });
+    expect(spy.mock.calls[0][0]).not.toHaveProperty("confidentiality");
+  });
+
+  it("fails closed when confidentiality is requested unauthenticated, before any network call", async () => {
+    const spy = vi.spyOn(OneClickService, "getQuote").mockResolvedValue({} as any);
+    await expect(quoteDeposit({ ...base, confidentiality: "basic" })).rejects.toThrow(/requires authentication/);
+    expect(spy).not.toHaveBeenCalled();
   });
 });
 

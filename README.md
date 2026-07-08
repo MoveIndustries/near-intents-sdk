@@ -27,6 +27,7 @@ const res = await quoteDeposit({
   refundTo: "0xYourEthereumAddress",
   minAmountOut: "995000",   // required floor in the destination asset's smallest units; throws if the quote's guaranteed output is lower. Pass "0" to opt out.
   // slippageTolerance: 100, // basis points, defaults to 100 (1%); raise it for `destinationAsset: "move"`
+  // confidentiality: "basic", // opt into NEAR Confidential Intents; requires a JWT (see below). Omit for a normal public quote.
 });
 const { depositAddress, amountOut, deadline } = res.quote;
 
@@ -43,6 +44,12 @@ const { status } = await getStatus(depositAddress!);
 ```
 
 The SDK never signs, broadcasts, or holds keys — step 2 returns an *unsigned* transaction for your wallet.
+
+## Confidential Intents
+
+Pass `confidentiality: "basic"` (or `"advanced"`) to `quoteDeposit` to route the swap through [NEAR Confidential Intents](https://www.near.org/blog/announcing-general-availability-of-confidential-intents) — confidential execution on a NEAR private shard, with order size, timing, and counterparties kept off the public chain. The deposit → Movement flow is otherwise identical; the destination stays pinned to your Movement address.
+
+Unlike the rest of the SDK, **confidential quotes require a JWT** — a public request returns `401 "authentication is required for confidential intent quotes"`. Set one with `configure({ jwt })`, or route through an authenticated proxy with `configure({ baseUrl })`. Without either, `quoteDeposit` throws before making the request.
 
 ## Supported routes
 
