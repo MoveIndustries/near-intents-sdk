@@ -51,7 +51,7 @@ Pass `confidentiality: "basic"` (or `"advanced"`) to `quoteDeposit` to route the
 
 Unlike the rest of the SDK, **confidential quotes require a JWT** — a public request returns `401 "authentication is required for confidential intent quotes"`. Set one with `configure({ jwt })`, or route through an authenticated proxy with `configure({ baseUrl })`. Without either, `quoteDeposit` throws before making the request.
 
-> **Note:** confidential execution needs a solver quoting confidential liquidity for the route. Movement's solver does not quote confidential Movement routes yet, so a confidential quote to Movement currently returns `400 "No liquidity available"`. The parameter itself is verified working (confidential quotes fill on other routes with this same request shape); confidential Movement swaps will start filling once Movement's solver adds confidential liquidity — no SDK change needed.
+> **Note:** confidential execution for Movement routes is coming soon. Until it's live, a confidential quote to Movement returns `400 "No liquidity available"`. The SDK integration is ready and verified (confidential quotes fill on other routes with this same request shape), and confidential Movement swaps will start filling automatically once support lands — no code change needed.
 
 ## Supported routes
 
