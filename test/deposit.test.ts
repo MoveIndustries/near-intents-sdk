@@ -31,6 +31,18 @@ describe("prepareDepositTx", () => {
     expect(tx.to).toBe("0x3c499c542cef5e3811e1192ce70d8cc03d5c3359");
   });
 
+  it("builds an ft_transfer call for a NEAR origin", () => {
+    const tx = prepareDepositTx("near", "usdt", q("deposit-abc.near", "5000000"));
+    expect(tx).toEqual({
+      family: "near",
+      receiverId: "usdt.tether-token.near",
+      methodName: "ft_transfer",
+      args: { receiver_id: "deposit-abc.near", amount: "5000000" },
+      gas: "30000000000000",
+      deposit: "1",
+    });
+  });
+
   it("throws on dry quotes (no depositAddress)", () => {
     expect(() => prepareDepositTx("ethereum", "usdc", q(undefined, "1"))).toThrow(/depositAddress/);
   });

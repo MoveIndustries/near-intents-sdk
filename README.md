@@ -19,7 +19,7 @@ configure({ jwt: process.env.ONE_CLICK_JWT }); // jwt optional; omit configure()
 
 // 1. Quote: USDC on Ethereum -> USDCx on Movement. Destination is pinned to Movement.
 const res = await quoteDeposit({
-  originChain: "ethereum",  // "ethereum" | "polygon" | "tron"
+  originChain: "ethereum",  // "ethereum" | "polygon" | "tron" | "near"
   originAsset: "usdc",      // "usdc" | "usdt"  (tron is usdt-only)
   destinationAsset: "usdcx", // "usdcx" | "move"
   amount: "1000000",        // 1.0 USDC, in the origin asset's smallest units
@@ -33,9 +33,11 @@ const { depositAddress, amountOut, deadline } = res.quote;
 // 2. (Optional) Build the unsigned deposit transfer; your wallet signs + broadcasts it.
 const depositTx = prepareDepositTx("ethereum", "usdc", res);
 // EVM: { family: "evm", to, value, data }   Tron: { family: "tron", contractAddress, function, parameter }
+// NEAR: { family: "near", receiverId, methodName: "ft_transfer", args, gas, deposit }
 
 // 3. (Optional) After broadcasting, hand 1Click the tx hash to speed up deposit detection.
 await submitDeposit(depositAddress!, "0xYourDepositTxHash");
+// For a NEAR origin, also pass the signing account: submitDeposit(depositAddress!, txHash, { nearSenderAccount: "you.near" })
 
 // 4. Read execution status. Poll on your own cadence until isTerminal(status).
 const { status } = await getStatus(depositAddress!);
@@ -46,7 +48,7 @@ The SDK never signs, broadcasts, or holds keys — step 2 returns an *unsigned* 
 
 ## Supported routes
 
-Backed by Movement's own solver: origins **Polygon, Ethereum, Tron** (USDC + USDT; Tron is USDT-only) → **USDCx** or **MOVE** on Movement.
+Backed by Movement's own solver: origins **Polygon, Ethereum, Tron, NEAR** (USDC + USDT; Tron is USDT-only) → **USDCx** or **MOVE** on Movement.
 
 ## Install
 

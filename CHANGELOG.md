@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.3
+
+### Added
+
+- Add `near` as a supported origin chain (USDC + USDT), alongside Ethereum, Polygon, and Tron. `prepareDepositTx` returns a new `NearDepositTx` (an unsigned NEP-141 `ft_transfer` call); `submitDeposit` takes an optional `nearSenderAccount`, required by the 1Click API for NEAR-origin deposits.
+
 ## 0.0.2
 
 ### Patch Changes
