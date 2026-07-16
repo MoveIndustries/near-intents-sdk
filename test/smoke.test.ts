@@ -9,14 +9,20 @@ const AMOUNT = "10000000";
 const EVM_REFUND = "0x1111111111111111111111111111111111111111";
 // Tron's raw hex (41 + 20 bytes) form, so it needs no base58 checksum like a T... address would.
 const TRON_REFUND = "410000000000000000000000000000000000000000";
+// A NEAR account ID. Unlike EVM/Tron, where any well-formed string passes, 1Click validates
+// that a NEAR ORIGIN_CHAIN refund account actually exists on-chain, so this must be a real
+// account — the canonical intents.near contract account serves as a stable, always-present one.
+const NEAR_REFUND = "intents.near";
 
 // refundTo is an origin-chain address, so it has to match the origin's encoding.
 // Each origin's deposit address also comes back in that chain's native encoding:
-//   evm  -> 0x-prefixed hex; tron -> base58check (T...) or hex (41...).
+//   evm  -> 0x-prefixed hex; tron -> base58check (T...) or hex (41...); near -> account ID
+//   (named a.b.near or a 64-char implicit hex account), lowercase [a-z0-9._-], 2-64 chars.
 const CASES = [
   { originChain: "ethereum", originAsset: "usdc", refundTo: EVM_REFUND, depositAddress: /^0x[0-9a-fA-F]+$/ },
   { originChain: "polygon", originAsset: "usdc", refundTo: EVM_REFUND, depositAddress: /^0x[0-9a-fA-F]+$/ },
   { originChain: "tron", originAsset: "usdt", refundTo: TRON_REFUND, depositAddress: /^(T[1-9A-HJ-NP-Za-km-z]+|41[0-9a-fA-F]+)$/ },
+  { originChain: "near", originAsset: "usdc", refundTo: NEAR_REFUND, depositAddress: /^[a-z0-9._-]{2,64}$/ },
 ] as const;
 
 // Integration tests, controlled by explicit levers (not by JWT presence):
