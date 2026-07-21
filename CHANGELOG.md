@@ -8,7 +8,7 @@
 
 ## 0.0.2
 
-### Patch Changes
+### Added
 
 - 25ed3f7: Add a required `minAmountOut` floor to `quoteDeposit`: reject a quote when its guaranteed output falls below the caller's minimum. Pass `"0"` to opt out.
 
