@@ -16,4 +16,10 @@ describe("submitDeposit", () => {
     await submitDeposit("0xdep", "0xtx", { memo: "m1" });
     expect(spy).toHaveBeenCalledWith({ depositAddress: "0xdep", txHash: "0xtx", memo: "m1" });
   });
+
+  it("passes nearSenderAccount for NEAR-origin deposits", async () => {
+    const spy = vi.spyOn(OneClickService, "submitDepositTx").mockResolvedValue({} as any);
+    await submitDeposit("near-dep.near", "abc123", { nearSenderAccount: "alice.near" });
+    expect(spy).toHaveBeenCalledWith({ depositAddress: "near-dep.near", txHash: "abc123", memo: undefined, nearSenderAccount: "alice.near" });
+  });
 });

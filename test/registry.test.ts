@@ -6,6 +6,8 @@ describe("registry", () => {
     expect(resolveOrigin("ethereum", "usdc").assetId).toContain("eth-0xa0b8");
     expect(resolveOrigin("polygon", "usdc").tokenAddress).toBe("0x3c499c542cef5e3811e1192ce70d8cc03d5c3359");
     expect(resolveOrigin("tron", "usdt").tokenAddress).toBe("41a614f803b6fd780986a42c78ec9c7f77e6ded13c");
+    expect(resolveOrigin("near", "usdc").tokenAddress).toBe("17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1");
+    expect(resolveOrigin("near", "usdt").tokenAddress).toBe("usdt.tether-token.near");
   });
 
   it("throws on unsupported pairs", () => {
