@@ -5,7 +5,7 @@ export type SupportedToken = {
   assetId: string;
   symbol: string;
   decimals: number;
-  chain: string; // 1Click chain id ('eth' | 'pol' | 'tron' | 'movement')
+  chain: string; // 1Click blockchain id (e.g. 'eth', 'bsc', 'arb', 'sol', 'aptos', 'movement')
   contractAddress?: string;
   price: number;
   priceUpdatedAt: string;
