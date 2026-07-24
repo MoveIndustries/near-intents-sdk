@@ -12,7 +12,17 @@ export type QuoteDepositParams = {
   minAmountOut: string; // smallest unit of the destination asset; reject the quote if its guaranteed output falls below this floor. Pass "0" to explicitly opt out.
   deadline?: string; // ISO; defaults to now + 10 min
   dry?: boolean;
+  confidentiality?: "basic" | "advanced"; // request NEAR Confidential Intents (confidential execution on a private shard); requires a JWT. Omit for a normal public quote. The deposit -> Movement flow is unchanged.
 };
+
+// The direct 1Click host, captured before any configure() call. Lets us distinguish a
+// definitely-unauthenticated direct caller from a proxy setup (which injects auth itself).
+const DEFAULT_BASE = OpenAPI.BASE;
+
+const CONFIDENTIALITY = {
+  basic: QuoteRequest.confidentiality.BASIC,
+  advanced: QuoteRequest.confidentiality.ADVANCED,
+} as const;
 
 // baseUrl points the SDK at a server-side proxy that injects the JWT, so the token
 // never ships to the browser; omit it to call 1Click directly.
@@ -30,6 +40,12 @@ export async function quoteDeposit(p: QuoteDepositParams): Promise<QuoteResponse
   if (!/^[0-9]+$/.test(p.minAmountOut)) {
     throw new Error(`minAmountOut must be a non-negative integer string ("0" opts out of the floor): ${p.minAmountOut}`);
   }
+  // Confidential quotes require authentication. Fail closed for a direct unauthenticated
+  // caller so they get a clear message instead of a raw 401; a proxy (custom baseUrl) is
+  // exempt because it injects the JWT server-side, invisible to us.
+  if (p.confidentiality && !OpenAPI.TOKEN && OpenAPI.BASE === DEFAULT_BASE) {
+    throw new Error(`confidentiality "${p.confidentiality}" requires authentication: pass a JWT to configure({ jwt }), or route through an authenticated proxy with configure({ baseUrl })`);
+  }
   const res = await OneClickService.getQuote({
     dry: p.dry ?? false,
     swapType: QuoteRequest.swapType.EXACT_INPUT,
@@ -43,6 +59,7 @@ export async function quoteDeposit(p: QuoteDepositParams): Promise<QuoteResponse
     refundTo: p.refundTo,
     refundType: QuoteRequest.refundType.ORIGIN_CHAIN,
     deadline,
+    ...(p.confidentiality ? { confidentiality: CONFIDENTIALITY[p.confidentiality] } : {}),
   });
   // Guard against a poorly-priced quote: compare the caller's floor against the quote's
   // guaranteed output (minAmountOut after slippage), not the expected amountOut, so the check
