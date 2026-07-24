@@ -22,4 +22,11 @@ describe("submitDeposit", () => {
     await submitDeposit("near-dep.near", "abc123", { nearSenderAccount: "alice.near" });
     expect(spy).toHaveBeenCalledWith({ depositAddress: "near-dep.near", txHash: "abc123", memo: undefined, nearSenderAccount: "alice.near" });
   });
+
+  it("rejects an empty depositAddress or txHash before calling the API", async () => {
+    const spy = vi.spyOn(OneClickService, "submitDepositTx").mockResolvedValue({} as any);
+    await expect(submitDeposit("0xdep", "")).rejects.toThrow(/txHash/);
+    await expect(submitDeposit("", "0xtx")).rejects.toThrow(/depositAddress/);
+    expect(spy).not.toHaveBeenCalled();
+  });
 });

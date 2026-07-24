@@ -13,5 +13,7 @@ export async function submitDeposit(
   txHash: string,
   opts: { memo?: string; nearSenderAccount?: string } = {},
 ): Promise<SubmitDepositTxResponse> {
+  if (!depositAddress.trim()) throw new Error("depositAddress is required");
+  if (!txHash.trim()) throw new Error("txHash is required");
   return OneClickService.submitDepositTx({ depositAddress, txHash, memo: opts.memo, nearSenderAccount: opts.nearSenderAccount });
 }
