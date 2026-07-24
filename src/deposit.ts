@@ -25,6 +25,7 @@ export function prepareDepositTx(origin: OriginKey, originAsset: StableKey, quot
   const { depositAddress, amountIn } = quote.quote;
   if (!depositAddress) throw new Error("quote has no depositAddress (dry run?)");
   if (!tokenAddress) throw new Error(`no verified L1 token address for ${origin}/${originAsset} (see tasks.md precondition)`);
+  if (!/^[1-9][0-9]*$/.test(amountIn)) throw new Error(`quote amountIn is not a positive integer: ${amountIn}`);
   const fam = family(origin);
   if (fam === "tron") {
     return { family: "tron", contractAddress: tokenAddress, function: "transfer(address,uint256)", parameter: [depositAddress, amountIn] };

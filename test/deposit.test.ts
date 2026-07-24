@@ -72,4 +72,10 @@ describe("prepareDepositTx", () => {
   it("throws on dry quotes (no depositAddress)", () => {
     expect(() => prepareDepositTx("ethereum", "usdc", q(undefined, "1"))).toThrow(/depositAddress/);
   });
+
+  it("rejects a non-positive-integer amountIn", () => {
+    const addr = "0x000000000000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9";
+    expect(() => prepareDepositTx("ethereum", "usdc", q(addr, "0"))).toThrow(/positive integer/);
+    expect(() => prepareDepositTx("ethereum", "usdc", q(addr, ""))).toThrow(/positive integer/);
+  });
 });
