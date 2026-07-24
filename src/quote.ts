@@ -32,10 +32,14 @@ export async function quoteDeposit(p: QuoteDepositParams): Promise<QuoteResponse
   if (!/^[0-9]+$/.test(p.minAmountOut)) {
     throw new Error(`minAmountOut must be a non-negative integer string ("0" opts out of the floor): ${p.minAmountOut}`);
   }
+  const slippageTolerance = p.slippageTolerance ?? 100;
+  if (!Number.isInteger(slippageTolerance) || slippageTolerance < 0 || slippageTolerance > 10000) {
+    throw new Error(`slippageTolerance must be an integer between 0 and 10000 basis points: ${p.slippageTolerance}`);
+  }
   const res = await OneClickService.getQuote({
     dry: p.dry ?? false,
     swapType: QuoteRequest.swapType.EXACT_INPUT,
-    slippageTolerance: p.slippageTolerance ?? 100,
+    slippageTolerance,
     originAsset: origin.assetId,
     destinationAsset: dest.assetId,
     amount: p.amount,
