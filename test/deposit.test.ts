@@ -5,13 +5,13 @@ const q = (depositAddress: string | undefined, amountIn: string) => ({ quote: { 
 
 describe("prepareDepositTx", () => {
   it("encodes an ERC-20 transfer for EVM origins", () => {
-    const tx = prepareDepositTx("ethereum", "usdc", q("0x000000000000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9", "1000000"));
+    const tx = prepareDepositTx("ethereum", "usdc", q("0xa1b2c3d4e5f60718293a4b5c6d7e8f9000112233", "1000000"));
     expect(tx).toEqual({
       family: "evm",
       to: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
       value: "0x0",
-      // selector + recipient(32B) + amount(32B = 0xf4240)
-      data: "0xa9059cbb" + "000000000000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9" + "00000000000000000000000000000000000000000000000000000000000f4240",
+      // selector + recipient(20B left-padded to 32B) + amount(32B = 0xf4240)
+      data: "0xa9059cbb" + "000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9000112233" + "00000000000000000000000000000000000000000000000000000000000f4240",
     });
   });
 
@@ -26,7 +26,7 @@ describe("prepareDepositTx", () => {
   });
 
   it("encodes polygon against native USDC", () => {
-    const tx = prepareDepositTx("polygon", "usdc", q("0x000000000000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9", "1000000")) as { family: string; to: string };
+    const tx = prepareDepositTx("polygon", "usdc", q("0xa1b2c3d4e5f60718293a4b5c6d7e8f9000112233", "1000000")) as { family: string; to: string };
     expect(tx.family).toBe("evm");
     expect(tx.to).toBe("0x3c499c542cef5e3811e1192ce70d8cc03d5c3359");
   });
@@ -44,7 +44,7 @@ describe("prepareDepositTx", () => {
   });
 
   it("encodes an ERC-20 transfer for a new EVM origin (BSC)", () => {
-    const tx = prepareDepositTx("bsc", "usdt", q("0x000000000000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9", "1000000000000000000")) as { family: string; to: string };
+    const tx = prepareDepositTx("bsc", "usdt", q("0xa1b2c3d4e5f60718293a4b5c6d7e8f9000112233", "1000000000000000000")) as { family: string; to: string };
     expect(tx.family).toBe("evm");
     expect(tx.to).toBe("0x55d398326f99059ff775485246999027b3197955");
   });
@@ -74,8 +74,13 @@ describe("prepareDepositTx", () => {
   });
 
   it("rejects a non-positive-integer amountIn", () => {
-    const addr = "0x000000000000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9";
+    const addr = "0xa1b2c3d4e5f60718293a4b5c6d7e8f9000112233";
     expect(() => prepareDepositTx("ethereum", "usdc", q(addr, "0"))).toThrow(/positive integer/);
     expect(() => prepareDepositTx("ethereum", "usdc", q(addr, ""))).toThrow(/positive integer/);
+  });
+
+  it("rejects a malformed EVM depositAddress before encoding calldata", () => {
+    expect(() => prepareDepositTx("ethereum", "usdc", q("0xdeadbeef", "1000000"))).toThrow(/20-byte hex/);
+    expect(() => prepareDepositTx("ethereum", "usdc", q("not-hex-at-all", "1000000"))).toThrow(/20-byte hex/);
   });
 });

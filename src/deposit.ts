@@ -39,5 +39,6 @@ export function prepareDepositTx(origin: OriginKey, originAsset: StableKey, quot
   if (fam === "aptos") {
     return { family: "aptos", function: "0x1::primary_fungible_store::transfer", typeArguments: ["0x1::fungible_asset::Metadata"], functionArguments: [tokenAddress, depositAddress, amountIn] };
   }
+  if (!/^0x[0-9a-fA-F]{40}$/.test(depositAddress)) throw new Error(`evm depositAddress is not a 20-byte hex address: ${depositAddress}`);
   return { family: "evm", to: tokenAddress, value: "0x0", data: "0xa9059cbb" + pad32(depositAddress) + pad32(BigInt(amountIn).toString(16)) };
 }
