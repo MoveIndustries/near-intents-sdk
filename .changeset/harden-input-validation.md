@@ -10,3 +10,4 @@ Harden fail-closed input validation and fix the deposit-type exports:
 - quoteDeposit rejects a non-parseable deadline instead of silently passing the past-deadline guard.
 - submitDeposit rejects an empty depositAddress or txHash before calling the API.
 - SolanaDepositTx and AptosDepositTx are exported from the package root.
+- Add a package exports map so modern-ESM (nodenext/bundler) resolution finds the entrypoint and types.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolveOrigin, resolveDest, normalizeRecipient, MOVEMENT } from "../src/registry.js";
+import { resolveOrigin, resolveDest, normalizeRecipient, MOVEMENT, ORIGINS } from "../src/registry.js";
 
 describe("registry", () => {
   it("resolves known origin/asset pairs", () => {
@@ -19,6 +19,15 @@ describe("registry", () => {
     expect(resolveOrigin("base", "usdc").tokenAddress).toBe("0x833589fcd6edb6e08f4c7c32d4f71b54bda02913");
     expect(resolveOrigin("solana", "usdc").tokenAddress).toBe("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
     expect(resolveOrigin("aptos", "usdt").decimals).toBe(6);
+  });
+
+  it("every EVM omft assetId embeds its own tokenAddress", () => {
+    const entries = Object.values(ORIGINS).flatMap((assets) => Object.values(assets)) as Array<{ assetId: string; tokenAddress?: string }>;
+    for (const entry of entries) {
+      const m = entry.assetId.match(/^nep141:[a-z]+-0x([0-9a-f]{40})\.omft\.near$/i);
+      if (!m) continue;
+      expect(entry.tokenAddress?.toLowerCase()).toBe("0x" + m[1].toLowerCase());
+    }
   });
 
   it("throws on unsupported pairs", () => {
