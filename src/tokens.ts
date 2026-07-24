@@ -5,7 +5,7 @@ export type SupportedToken = {
   assetId: string;
   symbol: string;
   decimals: number;
-  chain: string; // 1Click chain id ('eth' | 'pol' | 'tron' | 'movement')
+  chain: string; // 1Click blockchain id (e.g. 'eth', 'bsc', 'arb', 'sol', 'aptos', 'movement')
   contractAddress?: string;
   price: number;
   priceUpdatedAt: string;
@@ -20,14 +20,18 @@ type RouteTag = { originChain?: OriginKey; originAsset?: StableKey; destinationA
 // live token with the keys quoteDeposit expects, instead of callers translating back.
 const ROUTE_BY_ASSET_ID: Map<string, RouteTag> = (() => {
   const m = new Map<string, RouteTag>();
+  const put = (assetId: string, tag: RouteTag) => {
+    if (m.has(assetId)) throw new Error(`duplicate assetId in registry: ${assetId}`);
+    m.set(assetId, tag);
+  };
   const origins = ORIGINS as Record<string, Record<string, { assetId: string }>>;
   for (const origin of Object.keys(origins)) {
     for (const asset of Object.keys(origins[origin])) {
-      m.set(origins[origin][asset].assetId, { originChain: origin as OriginKey, originAsset: asset as StableKey });
+      put(origins[origin][asset].assetId, { originChain: origin as OriginKey, originAsset: asset as StableKey });
     }
   }
   const dests = MOVEMENT as Record<string, { assetId: string }>;
-  for (const dest of Object.keys(dests)) m.set(dests[dest].assetId, { destinationAsset: dest as DestKey });
+  for (const dest of Object.keys(dests)) put(dests[dest].assetId, { destinationAsset: dest as DestKey });
   return m;
 })();
 

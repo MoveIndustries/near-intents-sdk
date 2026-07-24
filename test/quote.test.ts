@@ -26,9 +26,12 @@ describe("quoteDeposit", () => {
   it("fails closed before any network call", async () => {
     const spy = vi.spyOn(OneClickService, "getQuote").mockResolvedValue({} as any);
     await expect(quoteDeposit({ ...base, amount: "0" })).rejects.toThrow(/amount/);
-    await expect(quoteDeposit({ ...base, originChain: "base" as any })).rejects.toThrow(/unsupported/);
+    await expect(quoteDeposit({ ...base, originChain: "faketestchain" as any })).rejects.toThrow(/unsupported/);
     await expect(quoteDeposit({ ...base, deadline: "2000-01-01T00:00:00.000Z" })).rejects.toThrow(/past/);
+    await expect(quoteDeposit({ ...base, deadline: "not-a-date" })).rejects.toThrow(/valid ISO/);
     await expect(quoteDeposit({ ...base, minAmountOut: "1.5" })).rejects.toThrow(/minAmountOut/);
+    await expect(quoteDeposit({ ...base, slippageTolerance: 20000 })).rejects.toThrow(/slippageTolerance/);
+    await expect(quoteDeposit({ ...base, slippageTolerance: -1 })).rejects.toThrow(/slippageTolerance/);
     expect(spy).not.toHaveBeenCalled();
   });
 

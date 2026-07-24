@@ -26,14 +26,20 @@ export async function quoteDeposit(p: QuoteDepositParams): Promise<QuoteResponse
   const dest = resolveDest(p.destinationAsset);
   if (!/^[0-9]+$/.test(p.amount) || BigInt(p.amount) <= 0n) throw new Error(`amount must be a positive integer string: ${p.amount}`);
   const deadline = p.deadline ?? new Date(Date.now() + 600_000).toISOString();
-  if (Date.parse(deadline) <= Date.now()) throw new Error(`deadline is in the past: ${deadline}`);
+  const deadlineMs = Date.parse(deadline);
+  if (Number.isNaN(deadlineMs)) throw new Error(`deadline is not a valid ISO timestamp: ${deadline}`);
+  if (deadlineMs <= Date.now()) throw new Error(`deadline is in the past: ${deadline}`);
   if (!/^[0-9]+$/.test(p.minAmountOut)) {
     throw new Error(`minAmountOut must be a non-negative integer string ("0" opts out of the floor): ${p.minAmountOut}`);
+  }
+  const slippageTolerance = p.slippageTolerance ?? 100;
+  if (!Number.isInteger(slippageTolerance) || slippageTolerance < 0 || slippageTolerance > 10000) {
+    throw new Error(`slippageTolerance must be an integer between 0 and 10000 basis points: ${p.slippageTolerance}`);
   }
   const res = await OneClickService.getQuote({
     dry: p.dry ?? false,
     swapType: QuoteRequest.swapType.EXACT_INPUT,
-    slippageTolerance: p.slippageTolerance ?? 100,
+    slippageTolerance,
     originAsset: origin.assetId,
     destinationAsset: dest.assetId,
     amount: p.amount,
