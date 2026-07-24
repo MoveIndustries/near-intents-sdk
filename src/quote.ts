@@ -26,7 +26,9 @@ export async function quoteDeposit(p: QuoteDepositParams): Promise<QuoteResponse
   const dest = resolveDest(p.destinationAsset);
   if (!/^[0-9]+$/.test(p.amount) || BigInt(p.amount) <= 0n) throw new Error(`amount must be a positive integer string: ${p.amount}`);
   const deadline = p.deadline ?? new Date(Date.now() + 600_000).toISOString();
-  if (Date.parse(deadline) <= Date.now()) throw new Error(`deadline is in the past: ${deadline}`);
+  const deadlineMs = Date.parse(deadline);
+  if (Number.isNaN(deadlineMs)) throw new Error(`deadline is not a valid ISO timestamp: ${deadline}`);
+  if (deadlineMs <= Date.now()) throw new Error(`deadline is in the past: ${deadline}`);
   if (!/^[0-9]+$/.test(p.minAmountOut)) {
     throw new Error(`minAmountOut must be a non-negative integer string ("0" opts out of the floor): ${p.minAmountOut}`);
   }

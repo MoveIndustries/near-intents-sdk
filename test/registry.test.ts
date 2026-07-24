@@ -10,9 +10,21 @@ describe("registry", () => {
     expect(resolveOrigin("near", "usdt").tokenAddress).toBe("usdt.tether-token.near");
   });
 
+  it("resolves the source-chain origins", () => {
+    // BSC stablecoins are 18-decimal, unlike the 6-decimal coins on every other chain.
+    expect(resolveOrigin("bsc", "usdc").decimals).toBe(18);
+    expect(resolveOrigin("bsc", "usdt").decimals).toBe(18);
+    expect(resolveOrigin("bsc", "usdt").tokenAddress).toBe("0x55d398326f99059ff775485246999027b3197955");
+    expect(resolveOrigin("arbitrum", "usdc").tokenAddress).toBe("0xaf88d065e77c8cc2239327c5edb3a432268e5831");
+    expect(resolveOrigin("base", "usdc").tokenAddress).toBe("0x833589fcd6edb6e08f4c7c32d4f71b54bda02913");
+    expect(resolveOrigin("solana", "usdc").tokenAddress).toBe("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+    expect(resolveOrigin("aptos", "usdt").decimals).toBe(6);
+  });
+
   it("throws on unsupported pairs", () => {
     expect(() => resolveOrigin("tron", "usdc")).toThrow(/unsupported/);
-    expect(() => resolveOrigin("base", "usdc")).toThrow(/unsupported/);
+    // base is a single-asset (usdc-only) origin.
+    expect(() => resolveOrigin("base", "usdt")).toThrow(/unsupported/);
   });
 
   it("resolves destinations and rejects others", () => {

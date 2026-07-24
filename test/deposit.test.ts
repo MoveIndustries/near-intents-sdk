@@ -43,6 +43,32 @@ describe("prepareDepositTx", () => {
     });
   });
 
+  it("encodes an ERC-20 transfer for a new EVM origin (BSC)", () => {
+    const tx = prepareDepositTx("bsc", "usdt", q("0x000000000000000000000000000000000a1b2c3d4e5f60718293a4b5c6d7e8f9", "1000000000000000000")) as { family: string; to: string };
+    expect(tx.family).toBe("evm");
+    expect(tx.to).toBe("0x55d398326f99059ff775485246999027b3197955");
+  });
+
+  it("emits an SPL transfer descriptor for Solana", () => {
+    const tx = prepareDepositTx("solana", "usdc", q("Jzn1hpcRTijgbkn3n7kjeH1sMsg9LogcfqEAqMFw2aM", "1000000"));
+    expect(tx).toEqual({
+      family: "solana",
+      splMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      owner: "Jzn1hpcRTijgbkn3n7kjeH1sMsg9LogcfqEAqMFw2aM",
+      amount: "1000000",
+    });
+  });
+
+  it("builds a fungible-asset transfer call for Aptos", () => {
+    const tx = prepareDepositTx("aptos", "usdc", q("0x2298", "1000000"));
+    expect(tx).toEqual({
+      family: "aptos",
+      function: "0x1::primary_fungible_store::transfer",
+      typeArguments: ["0x1::fungible_asset::Metadata"],
+      functionArguments: ["0xbae207659db88bea0cbead6da0ed00aac12edcdda169e591cd41c94180b46f3b", "0x2298", "1000000"],
+    });
+  });
+
   it("throws on dry quotes (no depositAddress)", () => {
     expect(() => prepareDepositTx("ethereum", "usdc", q(undefined, "1"))).toThrow(/depositAddress/);
   });

@@ -19,8 +19,8 @@ configure({ jwt: process.env.ONE_CLICK_JWT }); // jwt optional; omit configure()
 
 // 1. Quote: USDC on Ethereum -> USDCx on Movement. Destination is pinned to Movement.
 const res = await quoteDeposit({
-  originChain: "ethereum",  // "ethereum" | "polygon" | "tron" | "near"
-  originAsset: "usdc",      // "usdc" | "usdt"  (tron is usdt-only)
+  originChain: "ethereum",  // any OriginKey — see ORIGINS in src/registry.ts
+  originAsset: "usdc",      // "usdc" | "usdt"  (some origins carry only one)
   destinationAsset: "usdcx", // "usdcx" | "move"
   amount: "1000000",        // 1.0 USDC, in the origin asset's smallest units
   recipient: "0xYourMovementAddress",
@@ -32,8 +32,11 @@ const { depositAddress, amountOut, deadline } = res.quote;
 
 // 2. (Optional) Build the unsigned deposit transfer; your wallet signs + broadcasts it.
 const depositTx = prepareDepositTx("ethereum", "usdc", res);
-// EVM: { family: "evm", to, value, data }   Tron: { family: "tron", contractAddress, function, parameter }
-// NEAR: { family: "near", receiverId, methodName: "ft_transfer", args, gas, deposit }
+// EVM:    { family: "evm", to, value, data }
+// Tron:   { family: "tron", contractAddress, function, parameter }
+// NEAR:   { family: "near", receiverId, methodName: "ft_transfer", args, gas, deposit }
+// Solana: { family: "solana", splMint, owner, amount }         — derive the owner's ATA and transfer
+// Aptos:  { family: "aptos", function, typeArguments, functionArguments }
 
 // 3. (Optional) After broadcasting, hand 1Click the tx hash to speed up deposit detection.
 await submitDeposit(depositAddress!, "0xYourDepositTxHash");
@@ -48,7 +51,9 @@ The SDK never signs, broadcasts, or holds keys — step 2 returns an *unsigned* 
 
 ## Supported routes
 
-Backed by Movement's own solver: origins **Polygon, Ethereum, Tron, NEAR** (USDC + USDT; Tron is USDT-only) → **USDCx** or **MOVE** on Movement.
+Origins and their USDC/USDT assets are defined in [`ORIGINS`](src/registry.ts); destinations (USDCx, MOVE) in [`MOVEMENT`](src/registry.ts). Those are the canonical lists — consult them rather than a table here. `prepareDepositTx` emits a family-specific descriptor for each origin family (EVM, Tron, NEAR, Solana, Aptos).
+
+Which pairs actually quote is decided by Movement's solver at runtime, not by this SDK — a registered origin may return "no liquidity" for a given destination until the solver enables that route.
 
 ## Install
 
